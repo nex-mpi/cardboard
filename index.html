@@ -1,46 +1,74 @@
 <!DOCTYPE html>
-<!-- For rendering in VR -->
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>NeX</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-        <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NeX - Cardboard renderer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="styles/app.css">
+    <style>
+        body { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <div id='danger-modal' class="modal is-clipped">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div id='danger-model-text' class="notification is-danger">
+            </div>
+        </div>
+    </div>
+    <div class="view-container">
+        <div id='progress-texture-wrapper'>
+            <b>Loading textures:</b>
+            <div  class="progress-wrapper">
+                <progress id='progress-texture-val' class="progress is-primary is-large" value="0" max="100">0%</progress>
+                <p id='progress-texture-text' class="progress-value has-text-white">0 / 14</p>    
+            </div>
+        </div>
+        <div id="threejs-wrapper">
+            <!-- Threejs canvas here-->
+        </div>
+    </div>
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
         <script type="importmap">
             {
-              "imports": {
-                "three": "https://unpkg.com/three@0.148.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.148.0/examples/jsm/",
-                "jquery": "https://code.jquery.com/jquery-3.6.3.min.js"
-              }
+                "imports": {
+                    "three": "https://unpkg.com/three@0.148.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.148.0/examples/jsm/",
+                    "jquery": "https://code.jquery.com/jquery-3.6.3.min.js"
+                }
             }
         </script>
-
-		<script type="module">
-            
-            import {NexViewerApp} from './modules/NexViewerApp.js';
+        <script>
+            function error_dialogue(message){
+                document.getElementById("danger-modal").classList.add("is-active");
+                document.getElementById("danger-model-text").innerHTML=message;
+            }
+        </script>
+        <script type="module">
+                
+            import {NexVR} from './modules/NexVR.js';
             import {NexConfigReader} from './modules/NexConfigReader.js';
-
+            
             NexConfigReader().then(function(cfg){                
-                var app = new NexViewerApp(cfg);
+                cfg['dom'] = {
+                    'canvas_wrapper': document.getElementById('threejs-wrapper'),
+                    'progress_wrapper': document.getElementById('progress-texture-wrapper'),
+                    'progress_bar': document.getElementById('progress-texture-val'),
+                    'progress_text': document.getElementById('progress-texture-text')
+                }
+                var app = new NexVR(cfg);
                 app.init().then(()=>{
                     app.animate();
+                }).catch(err=>{
+                    error_dialogue(err)
                 });
                 window.app = app;
-            }).catch(function(err){
-                console.error(err);
-                //alert("Need to handle Config read error")
-            })
-            
-            
-       
-            
-            
-
-</script>
-	</body>
+            }).catch(err=>{
+                error_dialogue(err)
+            });
+        </script>
+  </body>
 </html>
+

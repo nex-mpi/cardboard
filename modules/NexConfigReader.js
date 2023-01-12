@@ -8,6 +8,9 @@ export function NexConfigReader(url){
             const urlParams = new URLSearchParams(queryString);
             url = urlParams.get('scene');
         }
+        if(!url){
+            return reject("Need to specify <b>?scene=</b>")
+        }
         $.getScript(url+ '/config.js', function() {
             var basis_angle_limit = -Math.PI;
             resolve({
@@ -35,6 +38,8 @@ export function NexConfigReader(url){
                     'max_viewing_up': max_viewing_up
                 }
             });
-        }).catch(err=>reject(err));    
+        }).catch(err=>{
+            return reject("<b>404:</b> <a href='"+url+"/config.js' target=_blank>"+url+ '/config.js</a> is not found')
+        });    
     })
 }

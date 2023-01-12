@@ -7,7 +7,6 @@ export class NexVR extends NexViewerApp{
 
         //register VR
         this.renderer.xr.enabled = true;
-        document.body.appendChild(VRButton.createButton(this.renderer));
         var self = this;
         this.renderer.setAnimationLoop( function () {
             self.render();
@@ -23,21 +22,11 @@ export class NexVR extends NexViewerApp{
         this.xrController.addEventListener( 'selectstart', function(e){
             self.recenter();
         });
-        /*
-        var updateAnimation = () =>{
-            requestAnimationFrame(self.animate.bind(self));
-        }
-        //register animation update
-        this.renderer.domElement.addEventListener("mousedown", updateAnimation, false);
-        this.renderer.domElement.addEventListener("mouseup", updateAnimation, false);
-        this.renderer.domElement.addEventListener("mouseout", updateAnimation, false);
-        this.renderer.domElement.addEventListener("mousemove", updateAnimation, false);
-        this.renderer.domElement.addEventListener("mousewheel", updateAnimation, false);
-
-        this.renderer.domElement.addEventListener("touchstart", updateAnimation, false);
-        this.renderer.domElement.addEventListener("touchend", updateAnimation, false);
-        this.renderer.domElement.addEventListener("touchmove", updateAnimation, false);
-        */
+        
+    }
+    initScene(){
+        super.initScene()
+        this.dom.wrapper.appendChild(VRButton.createButton(this.renderer));
     }
     recenter(){
         var c = this.camera.position;
@@ -45,9 +34,5 @@ export class NexVR extends NexViewerApp{
         this.scene.rotation.set(r.x,r.y,r.z);
         this.scene.position.set(c.x,c.y,c.z);
     }
-    /*
-    animate(){
-        this.render();
-    }
-    */
+   
 }

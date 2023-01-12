@@ -8,6 +8,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 export class NexViewerApp{
     constructor(cfg){
         this.cfg = cfg;
+        cfg.hasOwn
+        this.dom = {
+            'wrapper': (cfg.hasOwnProperty('dom') && cfg.dom.hasOwnProperty('canvas_wrapper') ) ? cfg.dom.canvas_wrapper : document.body,
+            'progress_wrapper': (cfg.hasOwnProperty('dom') && cfg.dom.hasOwnProperty('progress_wrapper') ) ? cfg.dom.progress_wrapper : undefined,
+            'progress_bar': (cfg.hasOwnProperty('dom') && cfg.dom.hasOwnProperty('progress_bar') ) ? cfg.dom.progress_bar : undefined,
+            'progress_text': (cfg.hasOwnProperty('dom') && cfg.dom.hasOwnProperty('progress_text') ) ? cfg.dom.progress_text : undefined,
+        }
     }
     init(){
         var self = this;
@@ -32,7 +39,7 @@ export class NexViewerApp{
         this.renderer = new THREE.WebGLRenderer({
             alpha: true,
             premultipliedAlpha: true,
-            precision: "highp",
+            precision: "lowp",
             stencil: false,
             depth: false,
             powerPreference: "high-performance",
@@ -42,7 +49,8 @@ export class NexViewerApp{
         //TODO: add texture size check support. if texture oversize should throw out something
         
         this.renderer.setSize( WIDTH, HEIGHT);
-        document.body.appendChild(this.renderer.domElement );
+
+        this.dom.wrapper.appendChild(this.renderer.domElement );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement );
         this.controls.target.set( 0.0, 0.0, -this.cfg.planes[0]);
         this.controls.update();
@@ -130,27 +138,39 @@ export class NexViewerApp{
     loadTexture(){
         //TODO: create progress bar
         var self = this;
-
+        
         return new Promise((resolve, reject)=>{
-            var count = 0;
+            var loaded_texture = 0;
+            var rejectCallback = (e) => {
+                reject("<b>404:</b> <a href='"+e.path[0].currentSrc+"' target=_blank>"+e.path[0].currentSrc+"</a> cannot be load ")
+            }
             var loadedCallback = () => {
-                count += 1;
-                if(count == 14){
+                loaded_texture += 1;
+                if(self.dom.progress_bar){
+                    self.dom.progress_bar.value = (loaded_texture / 14) * 100.0;
+                }
+                if(self.dom.progress_text){
+                    self.dom.progress_text.innerText  = ''+loaded_texture+' / 14';
+                }
+                if(loaded_texture == 14){
+                    if(self.dom.progress_wrapper){
+                        self.dom.progress_wrapper.style.display = 'none';
+                    }
                     resolve();                    
                 }
             }    
             var texloader = new THREE.TextureLoader();    
             self.textures = {}
             for(var i = 0; i< 3; i++){
-                self.textures["alpha_"+i] = texloader.load(self.cfg.url + "alpha_" + i + ".jpg", loadedCallback, undefined, reject)
+                self.textures["alpha_"+i] = texloader.load(self.cfg.url + "/alpha_" + i + ".jpg", loadedCallback, undefined, rejectCallback)
             }
             for(var i = 1; i <= 8; i++){
-                self.textures["coeff_"+i] = texloader.load(self.cfg.url + "basis_" + i + ".jpg", loadedCallback, undefined, reject )                
+                self.textures["coeff_"+i] = texloader.load(self.cfg.url + "/basis_" + i + ".jpg", loadedCallback, undefined, rejectCallback )                
             }
             for(var i = 1; i< 3; i++){
-                self.textures["basis_"+i] = texloader.load(self.cfg.url + "mpi_b_" + i + ".png", loadedCallback, undefined, reject )
+                self.textures["basis_"+i] = texloader.load(self.cfg.url + "/mpi_b_" + i + ".png", loadedCallback, undefined, rejectCallback )
             }
-            self.textures["color"] = texloader.load(self.cfg.url + "mpi_c.jpg", loadedCallback, undefined, reject )
+            self.textures["color"] = texloader.load(self.cfg.url + "/mpi_c.jpg", loadedCallback, undefined, rejectCallback )
 
         });
     }
