@@ -45,7 +45,9 @@ export class NexVR extends NexViewerApp{
         this.scene.rotation.set(r.x,r.y,r.z);
         this.scene.position.set(c.x,c.y,c.z);
     }
+    /*
     animate(){
         this.render();
     }
+    */
 }

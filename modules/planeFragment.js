@@ -102,6 +102,8 @@ vec3 getIllumination(vec2 vLoc)
     k[5] = texture2D(mpi_k5, vLoc);
     k[6] = texture2D(mpi_k6, vLoc);
     k[7] = texture2D(mpi_k7, vLoc);
+    //k[6] = vec4(0.0, 0.0, 0.0, 0.0);
+    //k[7] = vec4(0.0, 0.0, 0.0, 0.0);
 
     //scale coeff from [0,1] to [-1,1];
     for(int i = 0; i < 6; i++) k[i] = k[i] * 2.0 - 1.0;
@@ -158,14 +160,13 @@ void main(void)
     }
     
     color.a = getAlpha(); 
-    color.rgb = getColor();
     
-    /*
     // reduce texture call when no alpha to display
-    if(color.a > 0.0){ 
+    if(color.a > 0.05){ 
         color.rgb = getColor();
+    }else{
+        color.a = 0.0;
     }
-    */
     
     gl_FragColor = color;    
 }

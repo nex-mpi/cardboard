@@ -23,10 +23,12 @@ export class NexViewerApp{
     initThreeJS(){
         var fov_radian = 2.0 * Math.atan(0.5 * this.cfg['height'] /  this.cfg['focal']);
         this.cfg.fov_degree = fov_radian * 180 / Math.PI
+        //var WIDTH = 400, HEIGHT = 400;
+        var WIDTH = window.innerWidth, HEIGHT = window.innerHeight;
 
         // Initial
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera( this.cfg.fov_degree, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        this.camera = new THREE.PerspectiveCamera( this.cfg.fov_degree, WIDTH / HEIGHT, 0.1, 1000 );
         this.renderer = new THREE.WebGLRenderer({
             alpha: true,
             premultipliedAlpha: true,
@@ -39,7 +41,7 @@ export class NexViewerApp{
         this.renderer.setClearColor( 0x000000, 1 );
         //TODO: add texture size check support. if texture oversize should throw out something
         
-        this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setSize( WIDTH, HEIGHT);
         document.body.appendChild(this.renderer.domElement );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement );
         this.controls.target.set( 0.0, 0.0, -this.cfg.planes[0]);
