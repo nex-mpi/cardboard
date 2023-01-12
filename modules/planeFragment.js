@@ -16,11 +16,17 @@ uniform sampler2D mpi_k5;
 uniform sampler2D mpi_k6;
 uniform sampler2D mpi_k7;
 
+uniform float ax_shift;
+uniform float ay_shift;
+uniform float ah_ratio;
+uniform float aw_ratio;
+
+uniform float cx_shift;
+uniform float cy_shift;
+uniform float ch_ratio;
+uniform float cw_ratio;
+
 uniform float plane_id;
-uniform float n_col;
-uniform float n_row;
-uniform float a_row;
-uniform float alpha_id;
 
 varying vec2 vUv;
 varying vec3 vCoord; 
@@ -83,42 +89,54 @@ vec3 getIllumination()
 {
     //TODO: reimpplmenent    
 }
+ 
 
-vec3 getColor(){
-    vec3 color = vec3(0.0,0.0,0.0);
-    color = getBaseColor();
-    color = clamp(color.rgb + getIllumination(), 0.0, 1.0);
-    return color;
-}
 */
 
 float getAlpha()
 {   
     // calculate uv offset
     vec2 vLoc = vUv;
-    float offset_x = mod(alpha_id,n_col) / n_col;
-    float offset_y = 1.0 - (mod(alpha_id,a_row) / a_row);
-    vLoc.x = vLoc.x + offset_x;
-    vLoc.y = vLoc.y + offset_y;
-
+    vLoc.x = (vLoc.x * aw_ratio) + ax_shift;
+    vLoc.y = (vLoc.y * ah_ratio) + ay_shift;
     vec4 alpha = texture2D(mpi_a, vLoc); //TODO: in-effcient need a fix that make texture 3d become single channel.
-    return alpha[3];
+    return alpha[0];
 }
 
+vec3 getBaseColor(vec2 vLoc)
+{
+    vec4 baseColor = texture2D(mpi_c, vLoc);
+    return baseColor.rgb;
+}
+
+vec3 getColor(){
+    vec3 color = vec3(0.0,0.0,0.0);
+    vec2 vLoc =  vUv;
+    vLoc.x = (vLoc.x * cw_ratio) + cx_shift;
+    vLoc.y = (vLoc.y * ch_ratio) + cy_shift;
+    color = getBaseColor(vLoc);
+    return color;
+}
 
 void main(void)
 {
-    vec4 color = vec4(1.0,1.0,1.0,1.0);
+    vec4 color = vec4(0.0,1.0,0.0,0.0);
     
-    if(alpha_id > 0.0 && alpha_id < 1.0){
-        color.a = getAlpha(); 
+    
+    if(plane_id < 12.0 && plane_id > 10.0){
+        color.a = getAlpha();
     }
+    
+    color.a = getAlpha(); 
+    color.rgb = getColor();
+    
     /*
     // reduce texture call when no alpha to display
     if(color.a > 0.0){ 
         color.rgb = getColor();
     }
     */
+    
     gl_FragColor = color;    
 }
 

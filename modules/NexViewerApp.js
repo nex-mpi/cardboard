@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {VRButton} from 'three/addons/webxr/VRButton.js';
 import { planeFragmentShader } from './planeFragment.js';
 import { planeVertexShader } from './planeVertex.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 
@@ -38,13 +39,12 @@ export class NexViewerApp{
         });
         this.renderer.setClearColor( 0x000000, 1 );
         //TODO: add texture size check support. if texture oversize should throw out something
-        this.renderer.xr.enabled = true;
-        document.body.appendChild(VRButton.createButton(this.renderer));
+        //this.renderer.xr.enabled = true;
+        //document.body.appendChild(VRButton.createButton(this.renderer));
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild(this.renderer.domElement );
-
-    
-        
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement );
+        this.controls.update();
     }
     initScene(){
         this.planes = {};
@@ -53,6 +53,15 @@ export class NexViewerApp{
         var alpha_chs = this.computeAlphaCHs();
         var fov_width_tan = 0.5 * this.cfg['width']  / this.cfg['focal']; 
         var fov_height_tan = 0.5 * this.cfg['height']  / this.cfg['focal'];
+        
+        var n_col = this.cfg['maxcol'];
+        var n_row = Math.ceil(this.cfg['layers'] / n_col)
+        var a_row =  Math.ceil(this.cfg['planes'].length / 3 / n_col);
+        var ah_ratio =  1.0 / a_row;
+        var aw_ratio =  1.0 / this.cfg['maxcol'];
+        var ch_ratio =  1.0 / n_row;
+        var cw_ratio =  1.0 / this.cfg['maxcol'];
+        
   
         for(var planeId = 0; planeId < this.cfg['planes'].length; planeId++){
             var plane_width_ratio = ((this.cfg['width'] / 2.0) + this.cfg['offset']) / (this.cfg['width']  / 2.0);
@@ -63,20 +72,36 @@ export class NexViewerApp{
             var plane_height = fov_height_tan * (depth * plane_height_ratio) * 2.0;
             var plane_geo = new THREE.PlaneGeometry(plane_width, plane_height);
             
-            var alphaId = planeId - alpha_chs['starts'][alpha_chs['inds'][planeId]];
-            if(planeId == 6){
-                var a_row =  Math.ceil(this.cfg['planes'].length / 3 / this.cfg['maxcol']);
-                console.log((alphaId % this.cfg['maxcol']) / this.cfg['maxcol']);
-                console.log(1.0 - ((alphaId%a_row) / a_row));
-            }
+            var ax_shift = (planeId % n_col) / n_col;
+            var a_rowid = Math.floor(planeId / n_col) % a_row;
+            var a_row_flip_id = a_row - a_rowid - 1;
+            var ay_shift = a_row_flip_id * ah_ratio;
+            
+            var layer_id = Math.floor(planeId / this.cfg['sublayers']);
+            var cx_shift = (layer_id % n_col) / n_col;
+            var c_rowid = Math.floor(layer_id / n_row);
+            var c_row_flip_id = n_row - c_rowid - 1;
+            var cy_shift = c_row_flip_id * ch_ratio;
+            
+
+            /*
+            if(planeId == 11){
+                console.log(ax_shift);
+                console.log(ay_shift);
+            }*/
+
             this.materials[planeId] = new THREE.ShaderMaterial({
                 transparent: true,
                 uniforms: {   
                     plane_id: {value: planeId},
-                    alpha_id: {value: alphaId},
-                    n_col: {value: this.cfg['maxcol']},
-                    n_row: {value: Math.ceil(this.cfg['layers'].length / this.cfg['maxcol'])},
-                    a_row: {value: Math.ceil(this.cfg['planes'].length / 3 / this.cfg['maxcol'])},
+                    ax_shift: {value: ax_shift}, //shift the uv of alpha
+                    ay_shift: {value: ay_shift},
+                    ah_ratio: {value: ah_ratio}, //ratio the uv of alpha
+                    aw_ratio: {value: aw_ratio},
+                    cx_shift: {value: cx_shift},
+                    cy_shift: {value: cy_shift},
+                    ch_ratio: {value: ch_ratio},
+                    cw_ratio: {value: cw_ratio},
                     mpi_a: { type: "t", value: this.textures['alpha_'+alpha_chs['inds'][planeId]]},
                     mpi_b0: { type: "t", value: this.textures['basis_0']},
                     mpi_b1: { type: "t", value: this.textures['basis_1']},
@@ -101,6 +126,7 @@ export class NexViewerApp{
     }
     animate(){
         requestAnimationFrame(this.animate.bind(this));
+        this.controls.update();
 		this.renderer.render(this.scene, this.camera );
     }
     loadTexture(){
