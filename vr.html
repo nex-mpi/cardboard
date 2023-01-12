@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!-- For rendering in VR -->
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>NeX</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+        <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+        <script type="importmap">
+            {
+              "imports": {
+                "three": "https://unpkg.com/three@0.148.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.148.0/examples/jsm/",
+                "jquery": "https://code.jquery.com/jquery-3.6.3.min.js"
+              }
+            }
+        </script>
+
+		<script type="module">
+            /*
+            import {NexViewerApp} from './modules/NexViewerApp.js';
+
+            const app = new NexViewerApp({},function(self){
+                self.animate();
+            });
+            */
+            import * as THREE from 'three';
+            import {VRButton} from 'three/addons/webxr/VRButton.js';
+			import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+
+            class NexVRviewerApp{
+                constructor(cfg, callback){
+                    this.prepareConfig(cfg)
+                    this.initThreeJS()
+                    this.loadTexture(function(){           
+                        self.initScene();
+                        if(typeof(callback) === typeof(Function)){
+                            self.initStat();
+                            callback(self);
+                        }            
+                    });
+                }
+                initThreeJS(){
+                    // Initial
+                    
+                    var targetHeight = this.cfg
+                }
+
+            }
+
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+			const renderer = new THREE.WebGLRenderer();
+            renderer.xr.enabled = true;
+            document.body.appendChild(VRButton.createButton(renderer));
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			const cube = new THREE.Mesh( geometry, material );
+			scene.add( cube );
+
+			//camera.position.z = 5;
+            cube.position.z = -5;
+
+			function animate() {
+				requestAnimationFrame( animate );
+
+				//cube.rotation.x += 0.01;
+				//cube.rotation.y += 0.01;
+
+				renderer.render( scene, camera );
+			};
+
+			animate();
+            window.camera = camera;
+            window.cube = cube;
+            window.renderer = renderer;
+            window.scene = scene;
+            //VR render loop
+            renderer.setAnimationLoop( function () {
+                //cube.rotation.x += 0.01;
+				//cube.rotation.y += 0.01;
+                
+                renderer.render( scene, camera );
+            } );
+            
+            renderer.xr.addEventListener('sessionstart', () => {
+                setTimeout(function(){
+                    window.scene.rotation.set(0,0,0);
+                    window.scene.position.set(0,0,0);
+                    window.scene.applyMatrix4(window.camera.matrixWorld)
+
+                }, 100);
+                //renderer.xr.getCamera().rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+                //renderer.xr.getCamera().position.set(camera.position.x, camera.position.y, camera.position.z);
+            });
+            
+            window.isSelecting = false;
+            function onSelectStart() {
+
+                window.isSelecting = true;
+
+            }
+
+            function onSelectEnd() {
+
+                window.isSelecting = false;
+
+            }
+
+            var controller = renderer.xr.getController( 0 );
+           
+            controller.addEventListener( 'selectstart', function(e){
+                console.log(e)
+                window.scene.rotation.set(0,0,0);
+                window.scene.position.set(0,0,0);
+                window.scene.applyMatrix4(window.camera.matrixWorld)
+            });
+       
+            
+            
+
+</script>
+	</body>
+</html>
