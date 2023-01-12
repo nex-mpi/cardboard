@@ -39,11 +39,12 @@ export class NexViewerApp{
         });
         this.renderer.setClearColor( 0x000000, 1 );
         //TODO: add texture size check support. if texture oversize should throw out something
-        //this.renderer.xr.enabled = true;
-        //document.body.appendChild(VRButton.createButton(this.renderer));
+        this.renderer.xr.enabled = true;
+        document.body.appendChild(VRButton.createButton(this.renderer));
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild(this.renderer.domElement );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement );
+        this.controls.target.set( 0.0, 0.0, -this.cfg.planes[0]);
         this.controls.update();
     }
     initScene(){
@@ -79,16 +80,9 @@ export class NexViewerApp{
             
             var layer_id = Math.floor(planeId / this.cfg['sublayers']);
             var cx_shift = (layer_id % n_col) / n_col;
-            var c_rowid = Math.floor(layer_id / n_row);
+            var c_rowid = Math.floor(layer_id / n_col);
             var c_row_flip_id = n_row - c_rowid - 1;
             var cy_shift = c_row_flip_id * ch_ratio;
-            
-
-            /*
-            if(planeId == 11){
-                console.log(ax_shift);
-                console.log(ay_shift);
-            }*/
 
             this.materials[planeId] = new THREE.ShaderMaterial({
                 transparent: true,
@@ -102,9 +96,10 @@ export class NexViewerApp{
                     cy_shift: {value: cy_shift},
                     ch_ratio: {value: ch_ratio},
                     cw_ratio: {value: cw_ratio},
+                    basis_angle_limit: {value: this.cfg['basis_angle_limit']},
                     mpi_a: { type: "t", value: this.textures['alpha_'+alpha_chs['inds'][planeId]]},
-                    mpi_b0: { type: "t", value: this.textures['basis_0']},
-                    mpi_b1: { type: "t", value: this.textures['basis_1']},
+                    mpi_b0: { type: "t", value: this.textures['basis_1']},
+                    mpi_b1: { type: "t", value: this.textures['basis_2']},
                     mpi_c: { type: "t", value: this.textures['color']},
                     mpi_k0: { type: "t", value: this.textures['coeff_1']},
                     mpi_k1: { type: "t", value: this.textures['coeff_2']},

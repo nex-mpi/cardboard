@@ -9,7 +9,7 @@ export function NexConfigReader(url){
             url = urlParams.get('scene');
         }
         $.getScript(url+ '/config.js', function() {
-            
+            var basis_angle_limit = -Math.PI;
             resolve({
                 'url': url,
                 'width': w,
@@ -25,6 +25,7 @@ export function NexConfigReader(url){
                 'offset': offset,
                 'maxcol': maxcol,
                 'extrinsics': extrinsics,
+                'basis_angle_limit': basis_angle_limit,
                 'boundary':{
                     'rads': rads,
                     'focal': focal,
