@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import {VRButton} from 'three/addons/webxr/VRButton.js';
 import { planeFragmentShader } from './planeFragment.js';
 import { planeVertexShader } from './planeVertex.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -39,8 +38,7 @@ export class NexViewerApp{
         });
         this.renderer.setClearColor( 0x000000, 1 );
         //TODO: add texture size check support. if texture oversize should throw out something
-        this.renderer.xr.enabled = true;
-        document.body.appendChild(VRButton.createButton(this.renderer));
+        
         this.renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild(this.renderer.domElement );
         this.controls = new OrbitControls(this.camera, this.renderer.domElement );
@@ -119,10 +117,13 @@ export class NexViewerApp{
         }
         this.scene.add(this.frustum)
     }
-    animate(){
-        requestAnimationFrame(this.animate.bind(this));
+    render(){
         this.controls.update();
 		this.renderer.render(this.scene, this.camera );
+    }
+    animate(){
+        requestAnimationFrame(this.animate.bind(this));
+        this.render();
     }
     loadTexture(){
         //TODO: create progress bar
