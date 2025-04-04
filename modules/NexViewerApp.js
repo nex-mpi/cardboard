@@ -39,9 +39,9 @@ export class NexViewerApp{
         this.renderer = new THREE.WebGLRenderer({
             alpha: true,
             premultipliedAlpha: true,
-            precision: "lowp",
-            stencil: false,
-            depth: false,
+            precision: "highp",
+            //stencil: false,
+            //depth: false,
             powerPreference: "high-performance",
             antialias: true
         });
