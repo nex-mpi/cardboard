@@ -1,5 +1,6 @@
 import { NexViewerApp } from "./NexViewerApp.js";
-import {VRButton} from 'three/addons/webxr/VRButton.js';
+//import {VRButton} from 'three/addons/webxr/VRButton.js';
+import {XRButton} from 'three/addons/webxr/XRButton.js';
 
 export class NexVR extends NexViewerApp{
     initThreeJS(){
@@ -26,7 +27,7 @@ export class NexVR extends NexViewerApp{
     }
     initScene(){
         super.initScene()
-        this.dom.wrapper.appendChild(VRButton.createButton(this.renderer));
+        this.dom.wrapper.appendChild(XRButton.createButton(this.renderer));
     }
     recenter(){
         var c = this.camera.position;
